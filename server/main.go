@@ -28,13 +28,15 @@ func setupRouter() *gin.Engine {
 
 	v1 := r.Group("/api/v1")
 	{
-		v1.POST("/login", authMiddleware.LoginHandler)
+		auth := v1.Group("/auth")
+		{
+			auth.POST("/login", authMiddleware.LoginHandler)
+		}
 		v1.Use(authMiddleware.MiddlewareFunc())
 		{
 			v1.GET("/hello", helloHandler)
 		}
 	}
-
 	return r
 }
 
@@ -45,11 +47,11 @@ func setupAuth() {
 		Key:        []byte("secret key"),
 		Timeout:    time.Hour,
 		MaxRefresh: time.Hour,
-		Authenticator: func(email string, password string, c *gin.Context) (string, bool) {
-			if models.AuthenticateCredentials(email, password) {
-				return email, true
+		Authenticator: func(username string, password string, c *gin.Context) (string, bool) {
+			if models.AuthenticateCredentials(username, password) {
+				return username, true
 			}
-			return email, false
+			return username, false
 		},
 		Unauthorized: func(c *gin.Context, code int, message string) {
 			c.JSON(code, gin.H{

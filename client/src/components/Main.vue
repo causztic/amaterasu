@@ -1,10 +1,12 @@
 <template>
-<div class="login-page">
+<div class='login-page'>
   <h1>{{ msg }}</h1>
-  <v-form ref="form" v-model="valid">
-    <v-text-field v-model="username" label="username" :rules="req" required></v-text-field>
-    <v-text-field v-model="password" label="password" :rules="req" type="password" required></v-text-field>
-    <v-btn :disabled="!valid" @click="submit">
+  <v-form ref='form' v-model='valid'>
+    <v-text-field v-model='username' label='username' :rules='req' required></v-text-field>
+    <v-text-field v-model='password' label='password' :rules='req' type='password' required></v-text-field>
+    <v-chip v-if=error label color='red' text-color='white'>{{ error }}</v-chip>
+    <br/>
+    <v-btn :disabled='!valid' @click='submit'>
       submit
     </v-btn>
   </v-form>
@@ -23,16 +25,25 @@ export default {
       ],
       username: '',
       password: '',
+      error: '',
     };
   },
   methods: {
     submit() {
       if (this.$refs.form.validate()) {
         // Native form submission is not yet supported
-        this.axios.post('login', {
+        this.axios.post('auth/login', {
           username: this.username,
           password: this.password,
-        });
+        }).then((response) => {
+          console.log(response);
+        }).catch((error) => {
+          if (error.response.status === 401) {
+            this.error = 'Invalid login credentials.';
+          } else {
+            this.error = 'Server error.';
+          }
+        })
       }
     },
   },
