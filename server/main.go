@@ -24,12 +24,13 @@ func setupRouter() *gin.Engine {
 	// gin.DisableConsoleColor()
 	r := gin.Default()
 
-	r.POST("/login", authMiddleware.LoginHandler)
-
-	auth := r.Group("/v1")
-	auth.Use(authMiddleware.MiddlewareFunc())
+	v1 := r.Group("/api/v1")
 	{
-		auth.GET("/hello", helloHandler)
+		v1.POST("/login", authMiddleware.LoginHandler)
+		v1.Use(authMiddleware.MiddlewareFunc())
+		{
+			v1.GET("/hello", helloHandler)
+		}
 	}
 
 	return r
