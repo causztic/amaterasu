@@ -5,6 +5,7 @@ import (
 
 	"./models"
 	"github.com/appleboy/gin-jwt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,6 +24,7 @@ func setupRouter() *gin.Engine {
 	// Disable Console Color
 	// gin.DisableConsoleColor()
 	r := gin.Default()
+	r.Use(cors.Default())
 
 	v1 := r.Group("/api/v1")
 	{

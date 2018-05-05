@@ -24,7 +24,7 @@ const router = new Router({
 
 Vue.router = router;
 
-Vue.axios.defaults.baseURL = 'localhost:9000/api/v1';
+Vue.axios.defaults.baseURL = 'http://localhost:9000/api/v1';
 Vue.use(VueAuth, {
   auth: Bearer,
   http: HttpDriver,
