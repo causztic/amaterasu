@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
@@ -42,9 +41,10 @@ func itemHandler(c *gin.Context) {
 			"message": extension,
 		})
 	} else {
-		c.JSON(200, gin.H{
-			"message": fmt.Sprintf("Not a MP4: is a %s", extension),
-		})
+		c.File(name)
+		// c.JSON(200, gin.H{
+		// 	"message": fmt.Sprintf("Not a MP4: is a %s", extension),
+		// })
 	}
 }
 
