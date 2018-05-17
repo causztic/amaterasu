@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"./fs"
@@ -31,6 +33,21 @@ func itemsHandler(c *gin.Context) {
 	c.JSON(200, items)
 }
 
+func itemHandler(c *gin.Context) {
+	name := c.Query("name")
+	split := strings.Split(name, ".")
+	extension := split[len(split)-1]
+	if extension == "mp4" {
+		c.JSON(200, gin.H{
+			"message": extension,
+		})
+	} else {
+		c.JSON(200, gin.H{
+			"message": fmt.Sprintf("Not a MP4: is a %s", extension),
+		})
+	}
+}
+
 func setupRouter() *gin.Engine {
 	// Disable Console Color
 	// gin.DisableConsoleColor()
@@ -54,6 +71,7 @@ func setupRouter() *gin.Engine {
 		{
 			v1.GET("/hello", helloHandler)
 			v1.GET("/items", itemsHandler)
+			v1.GET("/item", itemHandler)
 		}
 	}
 	return r

@@ -16,8 +16,7 @@
   <br/>
   <v-layout column wrap v-if="file_view == 1">
     <v-flex xs2 class="file-details" v-for="file in files" :key="file.name">
-      <a class="file-name" v-if="file.isDirectory" v-on:click.once="moveTo(file.name)">{{file.name}}</a>
-      <div class="file-name" v-else>{{ file.name }}</div>
+      <a class="file-name" v-bind:class="{file: !file.isDirectory}" v-on:click.once="moveTo(file)">{{file.name}}</a>
     </v-flex>
   </v-layout>
   <v-layout row wrap v-else>
@@ -57,10 +56,25 @@ export default {
       this.updateDirectory();
       this.getItems();
     },
-    moveTo(name) {
-      this.directories.push(name);
-      this.updateDirectory();
-      this.getItems();
+    moveTo(file) {
+      if (file.isDirectory) {
+        this.directories.push(file.name);
+        this.updateDirectory();
+        this.getItems();
+      } else {
+        this.getItem(file.name);
+      }
+    },
+    getItem(name) {
+      this.axios.get('item', { params: { name: this.dir.concat(`/${name}`) } }).then((response) => {
+        console.log(response);
+      }).catch((error) => {
+        if (error.response.status === 401) {
+          this.$router.replace('/login');
+        } else {
+          this.status.text = error.response.data.message;
+        }
+      });
     },
     getItems() {
       this.axios.get('items', { params: { dir: this.dir } }).then((response) => {
@@ -80,6 +94,12 @@ export default {
 <style scoped>
   a:hover {
     color: #84baf0;
+  }
+  a.file {
+    color: #000;
+  }
+  a.file:hover {
+    color: #aaa;
   }
   .file-icon-group {
     display: flex;
