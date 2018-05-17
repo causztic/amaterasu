@@ -21,7 +21,13 @@ func helloHandler(c *gin.Context) {
 }
 
 func itemsHandler(c *gin.Context) {
-	items := fs.GetDirectoryItems("/Users/yaojie/Work/amaterasu/")
+	dir := c.DefaultQuery("dir", "/")
+
+	if len(dir) == 0 {
+		dir = "/"
+	}
+
+	items := fs.GetDirectoryItems(dir)
 	c.JSON(200, items)
 }
 
@@ -32,7 +38,7 @@ func setupRouter() *gin.Engine {
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:8080"},
 		AllowMethods:     []string{"PUT", "PATCH", "POST", "GET", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Authorization"},
+		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
