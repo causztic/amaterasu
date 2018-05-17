@@ -2,8 +2,8 @@
 <div class='login-page'>
   <h1>{{ msg }}</h1>
   <v-form ref='form' v-model='valid'>
-    <v-text-field v-model='username' label='username' :rules='req' required></v-text-field>
-    <v-text-field v-model='password' label='password' :rules='req' type='password' required></v-text-field>
+    <v-text-field v-model='username' label='username' :rules='req' required />
+    <v-text-field v-model='password' label='password' :rules='req' type='password' required />
     <v-chip v-if=error label color='red' text-color='white'>{{ error }}</v-chip>
     <br/>
     <v-btn :disabled='!valid' @click='submit'>
@@ -31,7 +31,6 @@ export default {
   methods: {
     submit() {
       if (this.$refs.form.validate()) {
-        // Native form submission is not yet supported
         this.axios.post('auth/login', {
           username: this.username,
           password: this.password,
@@ -39,11 +38,11 @@ export default {
           console.log(response);
         }).catch((error) => {
           if (error.response.status === 401) {
-            this.error = 'Invalid login credentials.';
+            this.error = error.response.data.message;
           } else {
             this.error = 'Server error.';
           }
-        })
+        });
       }
     },
   },

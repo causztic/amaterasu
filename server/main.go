@@ -16,7 +16,6 @@ func helloHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"email": claims["email"],
 		"role":  claims["role"],
-		"text":  "Hello World.",
 	})
 }
 
@@ -48,7 +47,7 @@ func setupAuth() {
 		Timeout:    time.Hour,
 		MaxRefresh: time.Hour,
 		Authenticator: func(username string, password string, c *gin.Context) (string, bool) {
-			if models.AuthenticateCredentials(username, password) {
+			if models.AuthenticateCredentials(username, []byte(password)) {
 				return username, true
 			}
 			return username, false
