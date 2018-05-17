@@ -1,8 +1,10 @@
 <template>
   <v-app>
-    <v-content>
-      <router-view/>
-    </v-content>
+    <v-container grid-list-md>
+      <v-content>
+        <router-view/>
+      </v-content>
+    </v-container>
   </v-app>
 </template>
 
