@@ -1,6 +1,9 @@
 <template>
 <div class='main-page'>
-  <h1>hello.</h1>
+  <v-chip v-if=status.text label color='red' text-color='white'>{{ status.text }}</v-chip>
+  <div>
+    {{ files }}
+  </div>
 </div>
 </template>
 
@@ -8,9 +11,21 @@
 export default {
   name: 'Main',
   data() {
-    return {};
+    return {
+      files: [],
+      status: {
+        text: '',
+      },
+    };
   },
-  methods: {},
+  // eslint-disable-next-line
+  beforeCreate: function() {
+    this.axios.get('items').then((response) => {
+      this.files = response.data;
+    });
+  },
+  methods: {
+  },
 };
 </script>
 

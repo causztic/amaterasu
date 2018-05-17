@@ -2,11 +2,11 @@
 <div class='login-page'>
   <v-chip v-if=status.text label color='red' text-color='white'>{{ status.text }}</v-chip>
   <h1>{{ msg }}</h1>
-  <v-form ref='form' v-model='valid' @submit="whatever">
+  <v-form ref='form' v-model='valid'  v-on:submit.prevent @submit='submit' >
     <v-text-field v-model='username' label='username' :rules='req' required />
     <v-text-field v-model='password' label='password' :rules='req' type='password' required />
     <br/>
-    <v-btn type='submit' :disabled='!valid' @click='submit'>
+    <v-btn type='submit' :disabled='!valid'>
       submit
     </v-btn>
   </v-form>
@@ -26,7 +26,7 @@ export default {
       username: '',
       password: '',
       status: {
-        text: ''
+        text: '',
       },
     };
   },

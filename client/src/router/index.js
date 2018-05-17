@@ -22,10 +22,15 @@ const router = new Router({
 });
 
 function checkIfAuth() {
-  const hasToken = (localStorage.getItem('amaterasu_token') !== null);
+  const token = localStorage.getItem('amaterasu_token');
   const expiryDate = localStorage.getItem('amaterasu_token_expire');
-  if (hasToken && expiryDate !== null) {
-    return new Date(expiryDate) > new Date();
+  if (token !== null && expiryDate !== null) {
+    if (new Date(expiryDate) > new Date()) {
+      axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+      return true;
+    }
+    delete axios.defaults.headers.common.Authorization;
+    return false;
   }
   localStorage.removeItem('amaterasu_token_expire');
   return false;

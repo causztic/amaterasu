@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"./fs"
 	"./models"
 	"github.com/appleboy/gin-jwt"
 	"github.com/gin-contrib/cors"
@@ -19,11 +20,23 @@ func helloHandler(c *gin.Context) {
 	})
 }
 
+func itemsHandler(c *gin.Context) {
+	items := fs.GetDirectoryItems("/Users/yaojie/Work/amaterasu/")
+	c.JSON(200, items)
+}
+
 func setupRouter() *gin.Engine {
 	// Disable Console Color
 	// gin.DisableConsoleColor()
 	r := gin.Default()
-	r.Use(cors.Default())
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:8080"},
+		AllowMethods:     []string{"PUT", "PATCH", "POST", "GET", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	v1 := r.Group("/api/v1")
 	{
@@ -34,6 +47,7 @@ func setupRouter() *gin.Engine {
 		v1.Use(authMiddleware.MiddlewareFunc())
 		{
 			v1.GET("/hello", helloHandler)
+			v1.GET("/items", itemsHandler)
 		}
 	}
 	return r
