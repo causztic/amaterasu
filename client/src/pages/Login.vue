@@ -1,12 +1,12 @@
 <template>
 <div class='login-page'>
+  <v-chip v-if=status.text label color='red' text-color='white'>{{ status.text }}</v-chip>
   <h1>{{ msg }}</h1>
-  <v-form ref='form' v-model='valid'>
+  <v-form ref='form' v-model='valid' @submit="whatever">
     <v-text-field v-model='username' label='username' :rules='req' required />
     <v-text-field v-model='password' label='password' :rules='req' type='password' required />
-    <v-chip v-if=error label color='red' text-color='white'>{{ error }}</v-chip>
     <br/>
-    <v-btn :disabled='!valid' @click='submit'>
+    <v-btn type='submit' :disabled='!valid' @click='submit'>
       submit
     </v-btn>
   </v-form>
@@ -15,7 +15,7 @@
 
 <script>
 export default {
-  name: 'Main',
+  name: 'Login',
   data() {
     return {
       msg: 'File Storage System',
@@ -25,7 +25,9 @@ export default {
       ],
       username: '',
       password: '',
-      error: '',
+      status: {
+        text: ''
+      },
     };
   },
   methods: {
@@ -35,12 +37,14 @@ export default {
           username: this.username,
           password: this.password,
         }).then((response) => {
-          console.log(response);
+          localStorage.setItem('amaterasu_token', response.data.token);
+          localStorage.setItem('amaterasu_token_expire', response.data.expire);
+          this.$router.replace('/');
         }).catch((error) => {
           if (error.response.status === 401) {
-            this.error = error.response.data.message;
+            this.status.text = error.response.data.message;
           } else {
-            this.error = 'Server error.';
+            this.status.text = 'Server error.';
           }
         });
       }
