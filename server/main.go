@@ -1,7 +1,6 @@
 package main
 
 import (
-	"strings"
 	"time"
 
 	"./fs"
@@ -34,18 +33,12 @@ func itemsHandler(c *gin.Context) {
 
 func itemHandler(c *gin.Context) {
 	name := c.Query("name")
-	split := strings.Split(name, ".")
-	extension := split[len(split)-1]
-	if extension == "mp4" {
-		c.JSON(200, gin.H{
-			"message": extension,
-		})
-	} else {
-		c.File(name)
-		// c.JSON(200, gin.H{
-		// 	"message": fmt.Sprintf("Not a MP4: is a %s", extension),
-		// })
-	}
+	// split := strings.Split(name, ".")
+	// extension := split[len(split)-1]
+	c.File(name)
+	// c.JSON(200, gin.H{
+	// 	"message": fmt.Sprintf("Not a MP4: is a %s", extension),
+	// })
 }
 
 func setupRouter() *gin.Engine {
@@ -67,11 +60,11 @@ func setupRouter() *gin.Engine {
 		{
 			auth.POST("/login", authMiddleware.LoginHandler)
 		}
+		v1.GET("/item", itemHandler)
 		v1.Use(authMiddleware.MiddlewareFunc())
 		{
 			v1.GET("/hello", helloHandler)
 			v1.GET("/items", itemsHandler)
-			v1.GET("/item", itemHandler)
 		}
 	}
 	return r

@@ -17,6 +17,7 @@
     "vue": "^2.5.2",
     "vue-axios": "^2.1.1",
     "vue-router": "^3.0.1",
+    "vue-video-player": "^5.0.2",
     "vuetify": "^1.0.17"
   },
   "devDependencies": {
