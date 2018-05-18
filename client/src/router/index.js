@@ -7,7 +7,7 @@ import VueAxios from 'vue-axios';
 
 Vue.use(Router);
 Vue.use(VueAxios, axios);
-Vue.axios.defaults.baseURL = 'http://localhost:9000/api/v1';
+Vue.axios.defaults.baseURL = 'http://192.168.1.142:9000/api/v1';
 
 const router = new Router({
   routes: [
