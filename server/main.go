@@ -1,6 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"os/exec"
+	"strings"
+	"sync"
 	"time"
 
 	"./fs"
@@ -8,9 +12,14 @@ import (
 	"github.com/appleboy/gin-jwt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/nareix/joy4/av/avutil"
+	"github.com/nareix/joy4/av/pubsub"
+	"github.com/nareix/joy4/format/rtmp"
 )
 
 var authMiddleware *jwt.GinJWTMiddleware
+var mutex *sync.RWMutex
+var rtmpServer *rtmp.Server
 
 func helloHandler(c *gin.Context) {
 	claims := jwt.ExtractClaims(c)
@@ -31,11 +40,74 @@ func itemsHandler(c *gin.Context) {
 	c.JSON(200, items)
 }
 
+func setupRmtp() {
+	rtmpServer = &rtmp.Server{}
+	mutex = &sync.RWMutex{}
+	type Channel struct {
+		que *pubsub.Queue
+	}
+	channels := map[string]*Channel{}
+
+	rtmpServer.HandlePlay = func(conn *rtmp.Conn) {
+		mutex.RLock()
+		ch := channels[conn.URL.Path]
+		mutex.RUnlock()
+
+		if ch != nil {
+			cursor := ch.que.Latest()
+			avutil.CopyFile(conn, cursor)
+		}
+	}
+
+	rtmpServer.HandlePublish = func(conn *rtmp.Conn) {
+		streams, _ := conn.Streams()
+
+		mutex.Lock()
+		ch := channels[conn.URL.Path]
+		if ch == nil {
+			ch = &Channel{}
+			ch.que = pubsub.NewQueue()
+			ch.que.WriteHeader(streams)
+			channels[conn.URL.Path] = ch
+		} else {
+			ch = nil
+		}
+		mutex.Unlock()
+		if ch == nil {
+			return
+		}
+
+		avutil.CopyPackets(ch.que, conn)
+
+		mutex.Lock()
+		delete(channels, conn.URL.Path)
+		mutex.Unlock()
+		ch.que.Close()
+	}
+
+}
+
 func itemHandler(c *gin.Context) {
 	name := c.Query("name")
-	// split := strings.Split(name, ".")
-	// extension := split[len(split)-1]
-	c.File(name)
+	split := strings.Split(name, ".")
+	split2 := strings.Split(name, "/")
+	lastName := split2[len(split2)-1]
+	extension := split[len(split)-1]
+	if extension == "avi" {
+		// run ffmpeg to start
+		cmd := exec.Cmd{
+			Path: "ffmpeg",
+			Args: []string{"-re", "-i", name, "-c copy", "-f", "flv", "rtmp://localhost/", lastName},
+		}
+		go func() {
+			_ = cmd.Run()
+		}()
+		c.JSON(200, gin.H{
+			"url": fmt.Sprintf("rtmp://localhost/%s", lastName),
+		})
+	} else {
+		c.File(name)
+	}
 	// c.JSON(200, gin.H{
 	// 	"message": fmt.Sprintf("Not a MP4: is a %s", extension),
 	// })
@@ -111,6 +183,8 @@ func setupAuth() {
 func main() {
 	models.InitDB()
 	setupAuth()
+	setupRmtp()
+	go rtmpServer.ListenAndServe()
 	r := setupRouter()
 	r.Run(":9000")
 }

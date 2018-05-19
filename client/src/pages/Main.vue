@@ -112,6 +112,14 @@ export default {
             type: `video/${ext}`,
             src,
           }];
+        } else {
+          this.axios.get('item', {
+            params: { name: fullName }})
+          .then((response) => {
+            console.log(response);
+          }).catch((error) => {
+            console.err(error);
+          })
         }
       } else {
         this.axios.get('item', {
